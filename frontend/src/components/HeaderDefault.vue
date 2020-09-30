@@ -60,13 +60,6 @@ export default {
       this.$store.commit('set_loggedin', false)
       this.user_name = 'Anonymous'
       this.$router.push('/').catch(err => {}) // eslint-disable-line
-    },
-    getUsername () {
-      Axios.post(process.env.VUE_APP_BASE_URL + '/api/username', {
-        token: this.$store.getters.current_token
-      }).then(response => {
-        this.user_name = response.data.user_name
-      })
     }
   },
   watch: {

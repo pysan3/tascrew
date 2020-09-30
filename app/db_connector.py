@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine, Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import os
@@ -19,12 +19,56 @@ class Users(Base):
 	email = Column('email', String)
 	phone_number = Column('phone_number', String)
 	nick_name = Column('nick_name', String)
+	real_name = Column('real_name', String)
 	address = Column('address', String)
 	ocupation = Column('ocupation', String)
+	off_days = Column('off_days', String)
+	off_times = Column('off_times', String)
 
 	def __repr__(self):
-		return '<Users(id=%s, user_name=%s, user_password=%s, created_at=%s, google_cred=%s, email=%s, phone_number=%s, nick_name=%s, address=%s, ocupation)>' \
-			% (self.id, self.user_name, self.user_password, self.created_at, self.google_cred, self.email, self.phone_number, self.nick_name, self.address, self.ocupation)
+		return '<Users(id=%s, user_name=%s, user_password=%s, created_at=%s, google_cred=%s, email=%s, phone_number=%s, nick_name=%s, real_name=%s, address=%s, ocupation=%s, off_days=%s, off_times=%s, )>' \
+			% (self.id, self.user_name, self.user_password, self.created_at, self.google_cred, self.email, self.phone_number, self.nick_name, self.real_name, self.address, self.ocupation, self.off_days, self.off_times)
+
+class Company(Base):
+	__tablename__ = 'company'
+	id = Column('id', Integer, primary_key=True, autoincrement=True)
+	company_name = Column('company_name', String)
+	department = Column('department', String)
+	employee_number = Column('employee_number', String)
+	address = Column('address', String)
+	email = Column('email', String)
+	phone_number = Column('phone_number', String)
+	admin = Column('admin', String)
+	sub_admin = Column('sub_admin', String)
+	members = Column('members', String)
+
+	def __repr__(self) -> str:
+		return '<Company(id=%s, company_name=%s, department=%s, employee_number=%s, address=%s, email=%s, phone_number=%s, admin=%s, sub_admin=%s, members=%s, )>' \
+			% (self.id, self.company_name, self.department, self.employee_number, self.address, self.email, self.phone_number, self.admin, self.sub_admin, self.members)
+
+class UsersSchedule(Base):
+	__tablename__ = 'usersschedule'
+	id = Column('id', Integer, primary_key=True, autoincrement=True)
+	user_id = Column('user_id', Integer)
+	pre_spare_time = Column('pre_spare_time', Integer)
+	post_spare_time = Column('post_spare_time', Integer)
+	kind = Column('kind', String)
+	event_id = Column('event_id', String)
+	created = Column('created', String)
+	updated = Column('updated', String)
+	summary = Column('summary', String)
+	description = Column('description', String)
+	location = Column('location', String)
+	creator = Column('creator', String)
+	organizer = Column('organizer', String)
+	start = Column('start', String)
+	end = Column('end', String)
+	icaluid = Column('icaluid', String)
+	extendedproperties = Column('extendedproperties', String)
+
+	def __repr__(self) -> str:
+		return '<UsersSchedule(id=%s, user_id=%s, pre_spare_time=%s, post_spare_time=%s, kind=%s, event_id=%s, created=%s, updated=%s, summary=%s, description=%s, location=%s, creator=%s, organizer=%s, start=%s, end=%s, icaluid=%s, extendedproperties=%s, )>' \
+			% (self.id, self.user_id, self.pre_spare_time, self.post_spare_time, self.kind, self.event_id, self.created, self.updated, self.summary, self.description, self.location, self.creator, self.organizer, self.start, self.end, self.icaluid, self.extendedproperties, )
 
 class UsersGoogleCalendar(Base):
 	__tablename__ = 'usersgooglecalendar'
@@ -38,6 +82,34 @@ class UsersGoogleCalendar(Base):
 	def __repr__(self) -> str:
 		return '<UsersGoogleCalendar(id=%s, user_id=%s, calendar_id=%s, summary=%s, description=%s, privacy_level=%s, )>' \
 			% (self.id, self.user_id, self.calendar_id, self.summary, self.description, self.privacy_level)
+
+class Tasks(Base):
+	__tablename__ = 'tasks'
+	id = Column('id', Integer, primary_key=True, autoincrement=True)
+	task_name = Column('task_name', String)
+	master_object = Column('master_object', String)
+	creator = Column('creator', String)
+	organizer = Column('organizer', String)
+	start_time_strict = Column('start_time_strict', String)
+	end_time_strict = Column('end_time_strict', String)
+	start_time = Column('start_time', String)
+	end_time = Column('end_time', String)
+	priority = Column('priority', String)
+	files = Column('files', String)
+	description = Column('description', String)
+	need_check = Column('need_check', Boolean)
+
+	def __repr__(self) -> str:
+		return '<Tasks(id=%s, task_name=%s, master_object=%s, creator=%s, organizer=%s, start_time_strict=%s, end_time_strict=%s, start_time=%s, end_time=%s, priority=%s, files=%s, description=%s, need_check=%s, )>' \
+			% (self.id, self.task_name, self.master_object, self.creator, self.organizer, self.start_time_strict, self.end_time_strict, self.start_time, self.end_time, self.priority, self.files, self.description, self.need_check, )
+
+class Notifications(Base):
+	__tablename__ = 'notifications'
+	id = Column('id', Integer, primary_key=True, autoincrement=True)
+
+	def __repr__(self) -> str:
+		return '<Notifications(id=%s, )>' \
+			% (self.id)
 
 class TokenTable(Base):
 	__tablename__ = 'tokentable'
