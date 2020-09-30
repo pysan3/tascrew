@@ -1,3 +1,4 @@
+from ast import Str
 from sqlalchemy import create_engine, Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -24,10 +25,11 @@ class Users(Base):
 	ocupation = Column('ocupation', String)
 	off_days = Column('off_days', String)
 	off_times = Column('off_times', String)
+	companies = Column('companies', String)
 
 	def __repr__(self):
-		return '<Users(id=%s, user_name=%s, user_password=%s, created_at=%s, google_cred=%s, email=%s, phone_number=%s, nick_name=%s, real_name=%s, address=%s, ocupation=%s, off_days=%s, off_times=%s, )>' \
-			% (self.id, self.user_name, self.user_password, self.created_at, self.google_cred, self.email, self.phone_number, self.nick_name, self.real_name, self.address, self.ocupation, self.off_days, self.off_times)
+		return '<Users(id=%s, user_name=%s, user_password=%s, created_at=%s, google_cred=%s, email=%s, phone_number=%s, nick_name=%s, real_name=%s, address=%s, ocupation=%s, off_days=%s, off_times=%s, companies=%s, )>' \
+			% (self.id, self.user_name, self.user_password, self.created_at, self.google_cred, self.email, self.phone_number, self.nick_name, self.real_name, self.address, self.ocupation, self.off_days, self.off_times, self.companies)
 
 class Company(Base):
 	__tablename__ = 'company'
@@ -98,10 +100,24 @@ class Tasks(Base):
 	files = Column('files', String)
 	description = Column('description', String)
 	need_check = Column('need_check', Boolean)
+	check_status = Column('check_status', Integer)
+	feedback = Column('feedback', String)
 
 	def __repr__(self) -> str:
-		return '<Tasks(id=%s, task_name=%s, master_object=%s, creator=%s, organizer=%s, start_time_strict=%s, end_time_strict=%s, start_time=%s, end_time=%s, priority=%s, files=%s, description=%s, need_check=%s, )>' \
-			% (self.id, self.task_name, self.master_object, self.creator, self.organizer, self.start_time_strict, self.end_time_strict, self.start_time, self.end_time, self.priority, self.files, self.description, self.need_check, )
+		return '<Tasks(id=%s, task_name=%s, master_object=%s, creator=%s, organizer=%s, start_time_strict=%s, end_time_strict=%s, start_time=%s, end_time=%s, priority=%s, files=%s, description=%s, need_check=%s, check_status=%s, feedback=%s, )>' \
+			% (self.id, self.task_name, self.master_object, self.creator, self.organizer, self.start_time_strict, self.end_time_strict, self.start_time, self.end_time, self.priority, self.files, self.description, self.need_check, self.check_status, self.feedback, )
+
+class TaskLog(Base):
+	__tablename__ = 'tasklog'
+	id = Column('id', Integer, primary_key=True, autoincrement=True)
+	user_id = Column('user_id', Integer)
+	task_id = Column('task_id', Integer)
+	start_time = Column('start_time', String)
+	end_time = Column('end_time', String)
+
+	def __repr__(self) -> str:
+		return '<TaskLog(id=%s, user_id=%s, task_id=%s, start_time=%s, end_time=%s, )>' \
+			% (self.id, self.user_id, self.task_id, self.start_time, self.end_time, )
 
 class Notifications(Base):
 	__tablename__ = 'notifications'
@@ -110,6 +126,22 @@ class Notifications(Base):
 	def __repr__(self) -> str:
 		return '<Notifications(id=%s, )>' \
 			% (self.id)
+
+class Projects(Base):
+	__tablename__ = 'projects'
+	id = Column('id', Integer, primary_key=True, autoincrement=True)
+	project_name = Column('project_name', String)
+	company_id = Column('company_id', Integer)
+	members = Column('members', String)
+	schedule_privacy_level = Column('schedule_privacy_level', Integer)
+	chart_color = Column('chart_color', String)
+	status = Column('status', Integer)
+	current_type = Column('current_type', Integer)
+	tree = Column('tree', String)
+
+	def __repr__(self) -> str:
+		return '<Projects(id=%s, project_name=%s, company_id=%s, members=%s, schedule_privacy_level=%s, chart_color=%s, status=%s, current_type=%s, tree=%s, )>' \
+			% (self.id, self.project_name, self.company_id, self.members, self.schedule_privacy_level, self.chart_color, self.status, self.current_type, self.tree, )
 
 class TokenTable(Base):
 	__tablename__ = 'tokentable'

@@ -40,12 +40,12 @@ def execute_command(*args):
 
 def db_init():
     if input('Going to delete all data in DB. Are you sure what you are doing? [y/N] ') == 'y':
+        print('initializing DB')
         import app.app as backapp
         from app.db_connector import Base, engine
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
         backapp.signup({'user_name': 'pysan3', 'user_password': '000'})
-        backapp.signup({'user_name': '0', 'user_password': 'a'})
     else:
         print('Not initializing the DB.')
 
