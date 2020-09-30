@@ -17,7 +17,7 @@ const state = {
     'company',
     'user'
   ],
-  validAccess: undefined
+  validAccess: {}
 }
 
 const getters = {
@@ -31,8 +31,12 @@ const getters = {
     return state.lang
   },
   getValidAccess (state) {
-    if (state.validAccess === undefined) return Object.fromEntries(state.accessType.map(e => [e, []]))
-    else return state.validAccess
+    for (let k of state.accessType) {
+      if (state.validAccess[k] === undefined) {
+        state.validAccess[k] = []
+      }
+    }
+    return state.validAccess
   }
 }
 
@@ -70,7 +74,7 @@ const actions = {
   },
   async refreshValidHashID ({ commit, getters }, { types }) {
     await Promise.all(types.map(type => {
-      return Axios.post(process.env.VUE_APP_BASE_URL + `/validhashid/${type}`, {
+      return Axios.post(process.env.VUE_APP_BASE_URL + `/api/validhashid/${type}`, {
         token: getters.current_token
       }).then(response => {
         if (response.data.type === type) {

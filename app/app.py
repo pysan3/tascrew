@@ -1,8 +1,18 @@
+from collections import UserDict
 import hashlib
 import secrets
 import datetime as dt
+import os
+from hashids import Hashids
 
 from app.db_connector import *
+
+accessType = [
+    'project',
+    'company',
+    'user'
+]
+accessHashid = Hashids(os.environ['HASHID_SALT'], 10)
 
 def login(data):
     with SessionContext() as session:
@@ -75,6 +85,37 @@ def username(user_id):
         return 'Anonymous'
     with SessionContext() as session:
         return session.query(Users).get(user_id).user_name
+
+def generateHashID(access_type, ids):
+    if not isinstance(access_type, int):
+        access_type = accessType.index(access_type)
+    return accessHashid.encode(ids, access_type)
+
+def decodeHashID(hash):
+    data = accessHashid.decode(hash)
+    return {
+        'ids': data[0],
+        'access_type': accessType[data[1]]
+    }
+
+def validID_project(user_id):
+    with SessionContext() as session:
+        return [accessHashid.encode(int(v), 0) for v in session.query(Users).get(user_id).projects.split(',')]
+
+def validID_company(user_id):
+    with SessionContext() as session:
+        return [accessHashid.encode(int(v), 1) for v in session.query(Users).get(user_id).companies.split(',')]
+
+def validID_user(user_id):
+    friends = set()
+    with SessionContext() as session:
+        user = session.query(Users).get(user_id)
+        for company in user.companies.split(','):
+            friends |= {int(member) for member in session.query(Company).get(int(company)).members.split(',')}
+        for project in user.projects.split(','):
+            friends |= {int(member) for member in session.query(Projects).get(int(project)).members.split(',')}
+    friends.remove(user_id)
+    return [accessHashid.encode(f, 2) for f in friends]
 
 def setfeedback(user_id, msg):
     if user_id is False:
