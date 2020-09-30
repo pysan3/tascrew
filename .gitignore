@@ -19,3 +19,4 @@ client_secret*
 dist/*
 /static/
 tmp*
+*.sqlite3
