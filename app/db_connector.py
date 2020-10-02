@@ -21,6 +21,7 @@ class Users(Base):
 	phone_number = Column('phone_number', String)
 	nick_name = Column('nick_name', String)
 	real_name = Column('real_name', String)
+	zipcode = Column('zipcode', String)
 	address = Column('address', String)
 	ocupation = Column('ocupation', String)
 	off_days = Column('off_days', String)
@@ -29,8 +30,8 @@ class Users(Base):
 	projects = Column('projects', String)
 
 	def __repr__(self):
-		return '<Users(id=%s, user_name=%s, user_password=%s, created_at=%s, google_cred=%s, email=%s, phone_number=%s, nick_name=%s, real_name=%s, address=%s, ocupation=%s, off_days=%s, off_times=%s, companies=%s, projects=%s, )>' \
-			% (self.id, self.user_name, self.user_password, self.created_at, self.google_cred, self.email, self.phone_number, self.nick_name, self.real_name, self.address, self.ocupation, self.off_days, self.off_times, self.companies, self.projects, )
+		return '<Users(id=%s, user_name=%s, user_password=%s, created_at=%s, google_cred=%s, email=%s, phone_number=%s, nick_name=%s, real_name=%s, zipcode=%s, address=%s, ocupation=%s, off_days=%s, off_times=%s, companies=%s, projects=%s, )>' \
+			% (self.id, self.user_name, self.user_password, self.created_at, self.google_cred, self.email, self.phone_number, self.nick_name, self.real_name, self.zipcode, self.address, self.ocupation, self.off_days, self.off_times, self.companies, self.projects, )
 
 class Company(Base):
 	__tablename__ = 'company'

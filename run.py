@@ -13,6 +13,13 @@ async def login(req, resp):
 @api.route('/api/signup')
 async def signup(req, resp):
     resp.media = backapp.signup(await req.media())
+    @api.background.task
+    def sendVerificationEmail(user_id):
+        # ユーザのメアドに確認のメールを送る
+        # これが完了するまではユーザはtmpに登録しておく
+        pass
+    if resp.media['isValid']:
+        sendVerificationEmail(backapp.verify_user(resp.media['token']))
 
 @api.route('/api/loggedin')
 async def logged_in(req, resp):

@@ -29,15 +29,6 @@ def language_settings():
         f.write(json.dumps(dictionary))
         pprint(dictionary)
 
-ENVIRON = {
-    'DATABASE_URL': 'sqlite:///apps/database.sqlite3'
-}
-
-def execute_command(*args):
-    os.system('; '.join([
-        '; '.join([f'{k}={v}' for k, v in ENVIRON]),
-    ] + args))
-
 def db_init():
     if input('Going to delete all data in DB. Are you sure what you are doing? [y/N] ') == 'y':
         print('initializing DB')
@@ -45,7 +36,17 @@ def db_init():
         from app.db_connector import Base, engine
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
-        backapp.signup({'user_name': 'pysan3', 'user_password': '000'})
+        backapp.signup({
+            'user_name': 'pysan3',
+            'user_password': '000',
+            'email': 'takutoitoi914@gmail.com',
+            'phone_number': '000-0000-0000',
+            'nick_name': 'pysan3',
+            'real_name': 'pysan3',
+            'zipcode': ['000', '0000'],
+            'address': ['hoge', 'fuga'],
+            'ocupation': []
+        })
     else:
         print('Not initializing the DB.')
 

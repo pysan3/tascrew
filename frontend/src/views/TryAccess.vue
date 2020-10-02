@@ -4,18 +4,34 @@
       <!-- Tabs Titles -->
       <h2>{{ pagename[islogin] }}</h2>
 
-      <!-- Icon -->
-      <div class="fadeIn first">
+      <div id="fadeInClass">
+        <!-- Icon -->
+        <div class="fadeIn">
+          <img src="@/assets/emoji.png">
+        </div>
+
+        <!-- Login Form -->
+        <input v-for="[key, value] in Array.from(input_info)" :key="key" :id="key" :type="value.type" :placeholder="value.placeholder" v-model="user_info[key]" v-show="(!islogin || value.showOnLogin) && !value.hidden" :required="value.required === true" class="fadeIn">
+
+        <!-- 郵便番号と住所 -->
+        <div id="zipcode_input" class="fadeIn" v-show="!islogin">
+          <span>〒</span>
+          <input type="tel" class="px-0" style="width:3em;" id="zip0" name="zip1" placeholder="000" maxlength="3" v-model="user_info.zipcode[0]" @input="getCompleteAddress(0)">
+          <span>-</span>
+          <input type="tel" class="px-0" style="width:4em;" id="zip1" name="zip1" placeholder="0000" maxlength="4" v-model="user_info.zipcode[1]" @input="getCompleteAddress(1)">
+          <div class="spinner-border spinner-border-sm" v-show="loadAddress"></div>
+        </div>
+        <input type="text" id="address_main" class="fadeIn" v-show="!islogin" placeholder="address main" v-model="user_info.address[0]">
+        <input type="text" id="address_sub" class="fadeIn" v-show="!islogin" placeholder="address sub" v-model="user_info.address[1]">
+
+        <textarea name="ocupation" class="fadeIn" cols="30" rows="10" v-model="user_info.ocupation" placeholder="後で綺麗に実装(キーワードから選択式にしたほうがいい気がする)"></textarea>
+
+        <input type="submit" class="fadeIn" :value="`${pagename[islogin]}`" @click="tryAccess()">
+
       </div>
-
-      <!-- Login Form -->
-      <input type="text" id="login" class="fadeIn second" placeholder="username" v-model="user_name">
-      <input type="text" id="password" class="fadeIn third" placeholder="password" v-model="user_password">
-      <input type="submit" class="fadeIn fourth" :value="`${pagename[islogin]}`" @click="tryAccess()">
-
       <!-- Remind Passowrd -->
       <div id="formFooter">
-      <a class="underlineHover" @click="islogin ^= 1">{{ msg[islogin^1] }}?</a>
+        <a class="underlineHover" @click="$router.push({ name: 'tryaccess', params: { page: pagename[islogin ^ 1] }, query: $route.query })">{{ msg[islogin ^ 1] }}?</a>
       </div>
 
     </div>
@@ -24,7 +40,9 @@
 
 <script>
 import Axios from 'axios'
+import Mixin from '@/mixin'
 export default {
+  mixins: [Mixin],
   watch: {
     $route (to, from) { // eslint-disable-line no-unused-vars
       this.page_type()
@@ -32,37 +50,150 @@ export default {
   },
   data () {
     return {
-      islogin: '',
-      user_name: '',
-      user_password: '',
-      nexturl: '/',
-      nextquery: {},
+      islogin: 1,
+      loadAddress: false,
       pagename: ['signup', 'login'],
-      msg: ['make a new account', 'already have an account']
+      msg: ['make a new account', 'already have an account'],
+      user_info: {
+        zipcode: ['', ''],
+        address: ['', ''],
+        prefcode: 0
+      },
+      input_info: new Map([
+        ['user_name', {
+          type: 'email',
+          placeholder: 'username',
+          required: true,
+          showOnLogin: true
+        }],
+        ['user_password', {
+          type: 'password',
+          placeholder: 'user password',
+          required: true,
+          showOnLogin: true
+        }],
+        ['re_password', {
+          type: 'password',
+          placeholder: 'retype password',
+          required: true,
+          checkFunc: e => e === this.user_info.user_password,
+          error_msg: 'not matching user_password'
+        }],
+        ['real_name', {
+          type: 'text',
+          placeholder: 'real name'
+        }],
+        ['nick_name', {
+          type: 'text',
+          placeholder: 'nick name'
+        }],
+        ['email', {
+          type: 'email',
+          placeholder: 'e-mail',
+          required: true,
+          checkFunc: e => e.match(/^[A-Za-z0-9]{1}[A-Za-z0-9_.-]*@{1}[A-Za-z0-9_.-]{1,}\.[A-Za-z0-9]{1,}$/)
+        }],
+        ['phone_number', {
+          type: 'tel',
+          placeholder: 'phone number',
+          required: true,
+          checkFunc: e => e.replace(/[━.*‐.*―.*－.*\-.*ー.*-]/gi, '').match(/^(0[5-9]0[0-9]{8}|0[1-9][1-9][0-9]{7})$/)
+        }],
+        ['zipcode', {
+          required: true,
+          hidden: true,
+          id_name: 'zipcode_input',
+          checkFunc: e => e[0].length === 3 && e[1].length === 4
+        }],
+        ['address', {
+          required: true,
+          hidden: true,
+          id_name: 'address_main',
+          checkFunc: e => e[0].length > 0
+        }],
+        ['ocupation', {
+          hidden: true
+        }]
+      ])
     }
   },
   methods: {
+    getCompleteAddress (place) {
+      this.loadAddress = true
+      if (this.user_info.zipcode[place].length < 3 + place) return
+      if (place === 0) {
+        document.getElementById('zip1').focus()
+      } else {
+        Axios.get(`${window.location.protocol}//madefor.github.io/postal-code-api/api/v1/${this.user_info.zipcode.join('/')}.json`).then(response => {
+          this.user_info.prefcode = response.data.data[0].prefcode
+          const addr = response.data.data[0][this.$i18n.locale]
+          this.user_info.address[0] = addr.prefecture + addr.address1 + addr.address2 + addr.address3
+          this.user_info.address[1] = addr.address4
+          this.loadAddress = false
+          document.getElementById('address_main').focus()
+        })
+      }
+    },
+    insertErrorMsg (element, msg) {
+      const error = document.createElement('div')
+      error.innerHTML = msg
+      error.style.color = 'red'
+      error.className += 'error_msg'
+      element.parentNode.insertBefore(error, element.nextSibling)
+    },
+    requiredError () {
+      // すでに表示中のエラーメッセージを一旦消去する
+      Array.from(document.getElementsByClassName('error_msg')).forEach(e => {
+        if (e.previousSibling.tagName.toLowerCase() === 'input') {
+          e.previousSibling.style.border = '2px solid #f6f6f6'
+        }
+        e.remove()
+      })
+      let hasError = false
+      for (const [key, value] of this.input_info) {
+        if (value.required === true) {
+          if (value.checkFunc === undefined) {
+            value.checkFunc = e => e.length > 0
+          }
+          if (this.user_info[key] === undefined || !value.checkFunc(this.user_info[key])) {
+            const place = document.getElementById(value.id_name || key)
+            place.style.borderColor = 'red'
+            this.insertErrorMsg(place, value.error_msg || 'more than 1 letter is required')
+            hasError = true
+          }
+        }
+      }
+      return hasError
+    },
     tryAccess () {
-      if (this.user_name.length * this.user_password.length === 0) {
-        alert('should not be zero charactors')
+      if (!this.islogin && this.requiredError()) {
+        alert('やり直してください')
         return
       }
-      Axios.post(process.env.VUE_APP_BASE_URL + `/api/${this.pagename[this.islogin]}`, {
-        user_name: this.user_name,
-        user_password: this.user_password
-      }).then(response => {
+      // 本名やニックネームが未定の場合はユーザ名を適用
+      if (this.user_info.real_name === undefined) this.user_info.real_name = this.user_info.user_name
+      if (this.user_info.nick_name === undefined) this.user_info.nick_name = this.user_info.user_name
+      Axios.post(process.env.VUE_APP_BASE_URL + `/api/${this.pagename[this.islogin]}`, this.user_info).then(response => {
         if (response.data.isValid === true) {
           const token = response.data.token
           localStorage.setItem('token', token)
           this.$store.commit('set_token', token)
           this.$store.commit('set_loggedin', true)
           this.$emit('rerender', 'header')
-          this.$router.push({
-            path: this.nexturl,
-            query: this.nextquery,
-            force: true
-          })
+          if (this.$route.query.code && (await this.assign2Company(this.$route.query.code))) {
+            this.$router.push({
+              path: this.$route.query.nexturl !== undefined ? this.$route.query.nexturl.replace('-', '/') : '/',
+              query: Object.fromEntries(Object.entries(this.$route.query).filter(([k]) => k !== 'nexturl')),
+              force: true
+            })
+          } else {
+            // TODO: push to the page for registering new companies
+            this.$router.push('/')
+          }
         } else {
+          if (response.data.already_taken === true) {
+            this.insertErrorMsg(document.getElementById('user_name'), 'this username is already taken.')
+          }
           alert(response.data.msg)
         }
       }).catch(error => {
@@ -80,19 +211,25 @@ export default {
       }
     }
   },
-  created () {
+  mounted () {
     this.page_type()
-    if (this.$route.query.nexturl !== undefined) {
-      this.nexturl = this.$route.query.nexturl.replace('-', '/')
-    }
-    for (let key in this.$route.query) {
-      if (key !== 'nexturl') {
-        this.nextquery[key] = this.$route.query[key]
-      }
-    }
+    this.$nextTick().then(() => {
+      Array.from(document.getElementById('fadeInClass').children).filter(e => e.style.display !== 'none').forEach((e, i) => {
+        e.setAttribute('style', `
+          -webkit-animation-delay: ${0.1 * i + 0.3}s;
+          -moz-animation-delay: ${0.1 * i + 0.3}s;
+          animation-delay: ${0.1 * i + 0.3}s;
+        `.replace(/\s/g, ''))
+      })
+    })
   }
 }
 </script>
+
+<style lang="stylus" scoped>
+img
+  width 20%
+</style>
 
 <style scoped>
 html {
@@ -203,9 +340,8 @@ input[type=button]:active, input[type=submit]:active, input[type=reset]:active  
   transform: scale(0.95);
 }
 
-input[type=text] {
+input[type=text], input[type=password], input[type=tel], input[type=email] {
   background-color: #f6f6f6;
-  border: none;
   color: #0d0d0d;
   padding: 15px 32px;
   text-align: center;
@@ -224,12 +360,12 @@ input[type=text] {
   border-radius: 5px 5px 5px 5px;
 }
 
-input[type=text]:focus {
+input[type=text]:focus, input[type=password]:focus, input[type=tel]:focus, input[type=email]:focus {
   background-color: #fff;
   border-bottom: 2px solid #5fbae9;
 }
 
-input[type=text]:placeholder {
+input[type=text]:placeholder, input[type=password]:placeholder, input[type=tel]:placeholder, input[type=email]:placeholder {
   color: #cccccc;
 }
 
@@ -289,30 +425,6 @@ input[type=text]:placeholder {
   -webkit-animation-duration:1s;
   -moz-animation-duration:1s;
   animation-duration:1s;
-}
-
-.fadeIn.first {
-  -webkit-animation-delay: 0.4s;
-  -moz-animation-delay: 0.4s;
-  animation-delay: 0.4s;
-}
-
-.fadeIn.second {
-  -webkit-animation-delay: 0.6s;
-  -moz-animation-delay: 0.6s;
-  animation-delay: 0.6s;
-}
-
-.fadeIn.third {
-  -webkit-animation-delay: 0.8s;
-  -moz-animation-delay: 0.8s;
-  animation-delay: 0.8s;
-}
-
-.fadeIn.fourth {
-  -webkit-animation-delay: 1s;
-  -moz-animation-delay: 1s;
-  animation-delay: 1s;
 }
 
 /* Simple CSS3 Fade-in Animation */

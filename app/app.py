@@ -1,7 +1,7 @@
-from collections import UserDict
 import hashlib
 import secrets
 import datetime as dt
+import json
 import os
 from hashids import Hashids
 
@@ -42,14 +42,22 @@ def signup(data):
     if found:
         return {
             'isValid': False,
-            'msg': '既に存在するユーザネームです'
+            'msg': '既に存在するユーザネームです',
+            'already_taken': True
         }
     else:
         with SessionContext() as session:
             session.add(Users(
                 user_name=data['user_name'],
                 user_password=hashlib.sha256(data['user_password'].encode()).hexdigest(),
-                created_at=dt.datetime.now().isoformat(' ', 'seconds')
+                created_at=dt.datetime.now().isoformat(' ', 'seconds'),
+                email = data['email'],
+                phone_number = data['phone_number'],
+                nick_name = data['nick_name'],
+                real_name = data['real_name'],
+                zipcode = '-'.join(data['zipcode']),
+                address = '/'.join(data['address']),
+                ocupation = json.dumps(data['ocupation']),
             ))
         with SessionContext() as session:
             return {

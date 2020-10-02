@@ -1,8 +1,8 @@
 <template>
   <div id="headerDefault" class="header-default">
-    <b-navbar toggleable="sm" type="dark" variant="dark" sticky="true">
+    <b-navbar toggleable="sm" type="dark" variant="dark" sticky>
       <b-navbar-brand to="/" class="mr-auto px-2">{{ $t('Message.title') }}</b-navbar-brand>
-      <b-navbar-nav>
+      <b-navbar-nav v-show="is_loggedin">
         <b-nav-item-dropdown>
           <template slot="button-content">{{ project_name }}</template>
         </b-nav-item-dropdown>
@@ -20,7 +20,7 @@
           <b-nav-item v-show="!is_loggedin" to="/tryaccess/login">Login</b-nav-item>
           <b-nav-item v-show="!is_loggedin" to="/tryaccess/signup">Signup</b-nav-item>
         </b-navbar-nav>
-        <b-navbar-nav class="ml-auto">
+        <b-navbar-nav v-show="is_loggedin" class="ml-auto">
           <b-nav-item>Bell</b-nav-item>
         </b-navbar-nav>
         <b-navbar-nav>
@@ -50,7 +50,8 @@ export default {
   ],
   data () {
     return {
-      user_name: 'Anonymous'
+      user_name: 'Anonymous',
+      project_name: 'tmp'
     }
   },
   methods: {
