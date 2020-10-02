@@ -24,7 +24,7 @@
         <input type="text" id="address_main" class="fadeIn" v-show="!islogin" placeholder="address main" v-model="user_info.address[0]">
         <input type="text" id="address_sub" class="fadeIn" v-show="!islogin" placeholder="address sub" v-model="user_info.address[1]">
 
-        <textarea name="ocupation" class="fadeIn" cols="30" rows="10" v-model="user_info.ocupation" placeholder="後で綺麗に実装(キーワードから選択式にしたほうがいい気がする)"></textarea>
+        <textarea v-show="!islogin" name="ocupation" class="fadeIn" cols="30" rows="10" v-model="user_info.ocupation" placeholder="後で綺麗に実装(キーワードから選択式にしたほうがいい気がする)"></textarea>
 
         <input type="submit" class="fadeIn" :value="`${pagename[islogin]}`" @click="tryAccess()">
 
@@ -173,7 +173,7 @@ export default {
       // 本名やニックネームが未定の場合はユーザ名を適用
       if (this.user_info.real_name === undefined) this.user_info.real_name = this.user_info.user_name
       if (this.user_info.nick_name === undefined) this.user_info.nick_name = this.user_info.user_name
-      Axios.post(process.env.VUE_APP_BASE_URL + `/api/${this.pagename[this.islogin]}`, this.user_info).then(response => {
+      Axios.post(process.env.VUE_APP_BASE_URL + `/api/${this.pagename[this.islogin]}`, this.user_info).then(async response => {
         if (response.data.isValid === true) {
           const token = response.data.token
           localStorage.setItem('token', token)

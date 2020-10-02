@@ -20,8 +20,8 @@
           <b-nav-item v-show="!is_loggedin" to="/tryaccess/login">Login</b-nav-item>
           <b-nav-item v-show="!is_loggedin" to="/tryaccess/signup">Signup</b-nav-item>
         </b-navbar-nav>
-        <b-navbar-nav v-show="is_loggedin" class="ml-auto">
-          <b-nav-item>Bell</b-nav-item>
+        <b-navbar-nav class="ml-auto">
+          <b-nav-item v-show="is_loggedin">Bell</b-nav-item>
         </b-navbar-nav>
         <b-navbar-nav>
           <b-nav-item-dropdown right id="user-dropdown">

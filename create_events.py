@@ -51,6 +51,7 @@ def db_init():
         print('Not initializing the DB.')
 
 def show_all_data(name:str, columns, data):
+    print(name.upper())
     print(tabulate([[d[col] for col in columns] for d in data], columns, tablefmt='github'))
 
 def find_tables():
