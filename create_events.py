@@ -39,7 +39,7 @@ def db_init():
         backapp.signup({
             'user_name': 'pysan3',
             'user_password': '000',
-            'email': 'takutoitoi914@gmail.com',
+            'email': 'hogehoge@test.com',
             'phone_number': '000-0000-0000',
             'nick_name': 'pysan3',
             'real_name': 'pysan3',
