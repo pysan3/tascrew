@@ -46,12 +46,15 @@ async def message(req, resp):
         'msg': backapp.unreadmessage(backapp.verify_user((await req.media())['token']))
     }
 
-@api.route('/api/validhashid/{hash_type}')
-async def validhashid(req, resp, *, hash_type):
-    resp.media = {
-        'type': hash_type,
-        'data': getattr(backapp, f'validID_{hash_type}')(backapp.verify_user((await req.media())['token']))
-    }
+@api.route('/api/validhashid/{hash_types}')
+async def validhashid(req, resp, *, hash_types):
+    user_id = backapp.verify_user((await req.media())['token'])
+    if hash_types == 'all':
+        hash_types = '-'.join(backapp.accessType)
+    resp.media = [{
+        'type': t,
+        'data': getattr(backapp, f'validID_{t}')(user_id)
+    } for t in hash_types.split('-')]
 
 @api.route('/auth/hasgoogle')
 async def hasgoogle(req, resp):

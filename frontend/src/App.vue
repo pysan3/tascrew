@@ -11,6 +11,9 @@ export default {
   name: 'App',
   components: {
     HeaderDefault
+  },
+  mounted () {
+    this.$store.dispatch('checkIsLoggedin')
   }
 }
 </script>

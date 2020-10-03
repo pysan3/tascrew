@@ -28,7 +28,7 @@ const i18n = new VueI18n({
 const checkHashID = async (id) => {
   if (store.dispatch('checkValidHashID', id)) return true
   else {
-    await store.dispatch('refreshValidHashID', store.dispatch('decodeHashID', id).type)
+    await store.dispatch('refreshValidHashID', [store.dispatch('decodeHashID', id).type])
     return store.dispatch('checkValidHashID', id)
   }
 }
@@ -45,14 +45,18 @@ router.beforeEach(async (to, from, next) => { // eslint-disable-line no-unused-v
       return
     }
   }
-  if (to.matched.some(record => record.meta.checkHashID) && to.params.id) {
-    if (!(await checkHashID(to.params.id))) { // check if this project/company/user is valid
+  if (to.matched.some(record => record.meta.checkHashID)) {
+    if (to.params.id && !(await checkHashID(to.params.id))) { // check if this project/company/user is valid
       alert('invalid project id')
       next({
         name: 'notfound'
       })
       return
     }
+    await store.dispatch( // アクセス権限を確認してない要素は更新する
+      'refreshValidHashID',
+      store.state.accessType.filter(e => store.getters.getValidAccess[e] === undefined)
+    )
   }
   next()
 })

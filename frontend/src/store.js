@@ -31,11 +31,6 @@ const getters = {
     return state.lang
   },
   getValidAccess (state) {
-    for (let k of state.accessType) {
-      if (state.validAccess[k] === undefined) {
-        state.validAccess[k] = []
-      }
-    }
     return state.validAccess
   }
 }
@@ -72,19 +67,23 @@ const actions = {
   checkValidHashID ({ getters, dispatch }, { hash }) {
     return getters.getValidAccess[dispatch('decodeHashID', hash).type].includes(hash)
   },
-  async refreshValidHashID ({ commit, getters }, { types }) {
-    await Promise.all(types.map(type => {
-      return Axios.post(process.env.VUE_APP_BASE_URL + `/api/validhashid/${type}`, {
-        token: getters.current_token
-      }).then(response => {
-        if (response.data.type === type) {
-          commit('setValidAccess', {
-            type: type,
-            value: response.data.data
-          })
-        }
+  async refreshValidHashID ({ commit, getters }, types) {
+    console.log(types)
+    if (!Array.isArray(types)) { // only needed for debugging
+      if (process.env.NODE_ENV !== 'production') alert('refreshValidHashID got a non-array object')
+      return
+    }
+    if (types.length === 0) return
+    return Axios.post(process.env.VUE_APP_BASE_URL + `/api/validhashid/${types.join('-')}`, {
+      token: getters.current_token
+    }).then(response => {
+      response.data.forEach(e => {
+        commit('setValidAccess', {
+          type: e.type,
+          value: e.data
+        })
       })
-    }))
+    })
   },
   checkIsLoggedin ({ commit, getters }) {
     if (getters.current_token === 'none') return false
@@ -96,7 +95,7 @@ const actions = {
         return true
       } else return false
     }).catch(error => {
-      if (process.env.BUILD_TYPE === 'local') alert(error)
+      if (process.env.NODE_ENV !== 'production') alert(error)
       return false
     })
   }

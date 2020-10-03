@@ -45,12 +45,14 @@ def db_init():
             'real_name': 'pysan3',
             'zipcode': ['000', '0000'],
             'address': ['hoge', 'fuga'],
-            'ocupation': []
+            'ocupation': [],
+            'companies': [],
+            'projects': []
         })
     else:
         print('Not initializing the DB.')
 
-def show_all_data(name:str, columns, data):
+def show_all_data(name, columns, data):
     print(name.upper())
     print(tabulate([[d[col] for col in columns] for d in data], columns, tablefmt='github'))
 
@@ -68,7 +70,7 @@ def find_tables():
 def db_show():
     with SessionContext() as session:
         for t in find_tables():
-            show_all_data(t, t.__table__.c.keys(), [DBtoDict(s) for s in session.query(t).all()])
+            show_all_data(str(t), t.__table__.c.keys(), [DBtoDict(s) for s in session.query(t).all()])
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='upload .md to your webpage')

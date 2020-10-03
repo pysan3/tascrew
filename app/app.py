@@ -58,6 +58,8 @@ def signup(data):
                 zipcode = '-'.join(data['zipcode']),
                 address = '/'.join(data['address']),
                 ocupation = json.dumps(data['ocupation']),
+                companies = json.dumps(data['companies']),
+                projects = json.dumps(data['projects']),
             ))
         with SessionContext() as session:
             return {
@@ -108,20 +110,20 @@ def decodeHashID(hash):
 
 def validID_project(user_id):
     with SessionContext() as session:
-        return [accessHashid.encode(int(v), 0) for v in session.query(Users).get(user_id).projects.split(',')]
+        return [accessHashid.encode(v, 0) for v in json.loads(session.query(Users).get(user_id).projects)]
 
 def validID_company(user_id):
     with SessionContext() as session:
-        return [accessHashid.encode(int(v), 1) for v in session.query(Users).get(user_id).companies.split(',')]
+        return [accessHashid.encode(v, 1) for v in json.loads(session.query(Users).get(user_id).companies)]
 
 def validID_user(user_id):
-    friends = set()
+    friends = {user_id}
     with SessionContext() as session:
         user = session.query(Users).get(user_id)
-        for company in user.companies.split(','):
-            friends |= {int(member) for member in session.query(Company).get(int(company)).members.split(',')}
-        for project in user.projects.split(','):
-            friends |= {int(member) for member in session.query(Projects).get(int(project)).members.split(',')}
+        for project in json.loads(user.projects):
+            friends |= {member for member in json.loads(session.query(Projects).get(project).members)}
+        for company in json.loads(user.companies):
+            friends |= {member for member in json.loads(session.query(Company).get(company).members)}
     friends.remove(user_id)
     return [accessHashid.encode(f, 2) for f in friends]
 
