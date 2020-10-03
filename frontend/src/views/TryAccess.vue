@@ -197,7 +197,7 @@ export default {
           alert(response.data.msg)
         }
       }).catch(error => {
-        if (process.env.BUILD_TYPE === 'local') alert(error)
+        if (process.env.NODE_ENV !== 'production') alert(error)
         alert('通信エラーが発生しました。\nやり直してください')
       })
     },
