@@ -29,8 +29,8 @@ def language_settings():
         f.write(json.dumps(dictionary))
         pprint(dictionary)
 
-def db_init():
-    if input('Going to delete all data in DB. Are you sure what you are doing? [y/N] ') == 'y':
+def db_init(auto_yes=False):
+    if auto_yes or input('Going to delete all data in DB. Are you sure what you are doing? [y/N] ') == 'y':
         print('initializing DB')
         import app.app as backapp
         from app.db_connector import Base, engine
@@ -82,12 +82,13 @@ if __name__ == "__main__":
     parser.add_argument('-t', '--test', action='store_true', help='npm run dev')
     parser.add_argument('-r', '--run', action='store_true', help='python run.py')
     parser.add_argument('-l', '--lang', action='store_true', help='language json')
+    parser.add_argument('-y', '--yes', action='store_true', help='pass yes to all verifications')
 
     args = parser.parse_args()
 
     if args.db:
         if args.db == 'init':
-            db_init()
+            db_init(args.yes)
         elif args.db == 'show':
             db_show()
         else:
