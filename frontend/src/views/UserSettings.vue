@@ -37,19 +37,19 @@ export default {
         'CalendarAPI',
         'NotFound'
       ],
-      current_menu: this.$route.params.menu
+      current_menu: this.$route.query.menu
     }
   },
   watch: {
-    '$route.params.menu': function (menu) {
+    '$route.query.menu': function (menu) {
       this.current_menu = menu || this.setting_list[0].toLowerCase()
     }
   },
   created () {
-    if (!this.$route.params.menu) {
+    if (!this.$route.query.menu) {
       this.$router.push({
         name: 'usersettings',
-        params: { menu: this.setting_list[0].toLowerCase() }
+        query: { menu: this.setting_list[0].toLowerCase() }
       })
     }
   }
