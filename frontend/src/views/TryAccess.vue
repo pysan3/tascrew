@@ -24,7 +24,7 @@
         <input type="text" id="address_main" class="fadeIn" v-show="!islogin" placeholder="address main" v-model="user_info.address[0]">
         <input type="text" id="address_sub" class="fadeIn" v-show="!islogin" placeholder="address sub" v-model="user_info.address[1]">
 
-        <textarea v-show="!islogin" name="ocupation" class="fadeIn" cols="30" rows="10" v-model="user_info.ocupation" placeholder="後で綺麗に実装(キーワードから選択式にしたほうがいい気がする)"></textarea>
+        <textarea v-show="!islogin" name="ocupation" class="fadeIn" cols="30" rows="4" v-model="user_info.ocupation" placeholder="後で綺麗に実装(キーワードから選択式にしたほうがいい気がする)"></textarea>
 
         <input type="submit" class="fadeIn" :value="`${pagename[islogin]}`" @click="tryAccess()">
 
@@ -40,11 +40,9 @@
 
 <script>
 import Axios from 'axios'
-import Mixin from '@/mixin'
 export default {
-  mixins: [Mixin],
   watch: {
-    $route (to, from) { // eslint-disable-line no-unused-vars
+    '$route.params.page' (to, from) { // eslint-disable-line no-unused-vars
       this.page_type()
     }
   },
@@ -57,7 +55,8 @@ export default {
       user_info: {
         zipcode: ['', ''],
         address: ['', ''],
-        prefcode: 0
+        prefcode: 0,
+        ocupation: ''
       },
       input_info: new Map([
         ['user_name', {
@@ -131,6 +130,8 @@ export default {
           this.user_info.address[1] = addr.address4
           this.loadAddress = false
           document.getElementById('address_main').focus()
+        }).catch(error => {
+          if (process.env.NODE_ENV !== 'production') alert(error)
         })
       }
     },
@@ -173,6 +174,13 @@ export default {
       // 本名やニックネームが未定の場合はユーザ名を適用
       if (this.user_info.real_name === undefined) this.user_info.real_name = this.user_info.user_name
       if (this.user_info.nick_name === undefined) this.user_info.nick_name = this.user_info.user_name
+      const nextquery = Object.assign({}, this.$route.query)
+      delete nextquery['nexturl']
+      const nextpath = {
+        path: this.$route.query.nexturl !== undefined ? this.$route.query.nexturl.replace('-', '/') : '/',
+        query: nextquery,
+        force: true
+      }
       Axios.post(process.env.VUE_APP_BASE_URL + `/api/${this.pagename[this.islogin]}`, this.user_info).then(async response => {
         if (response.data.isValid === true) {
           const token = response.data.token
@@ -180,15 +188,13 @@ export default {
           this.$store.commit('set_token', token)
           this.$store.commit('set_loggedin', true)
           this.$emit('rerender', 'header')
-          if (this.$route.query.code && (await this.assign2Company(this.$route.query.code))) {
-            this.$router.push({
-              path: this.$route.query.nexturl !== undefined ? this.$route.query.nexturl.replace('-', '/') : '/',
-              query: Object.fromEntries(Object.entries(this.$route.query).filter(([k]) => k !== 'nexturl')),
-              force: true
-            })
+          if (this.$route.query.code && (await this.$_assign2Company(this.$route.query.code))) { // has code in query and gets assigned to a company
+            this.$router.push(nextpath)
+          } else if (await this.$_refreshValidHashID(['company']).then(() => this.$store.getters.getValidAccess['company'].length)) { // has no code but is already registered to a company
+            this.$router.push(nextpath)
           } else {
             // TODO: push to the page for registering new companies
-            this.$router.push('/')
+            this.$router.push('/addcompany')
           }
         } else {
           if (response.data.already_taken === true) {
