@@ -6,7 +6,7 @@
       </div>
       <h2>{{ $t('Message.notfoundTitle') }}</h2>
       <p>{{ $t('Message.notfoundMsg') }}</p>
-      <a href="/">{{ $t('Message.notfoundReturn') }}</a>
+      <router-link to="/feedback">{{ $t('Message.notfoundReturn') }}</router-link>
     </div>
   </div>
 </template>
