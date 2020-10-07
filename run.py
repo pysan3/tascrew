@@ -1,6 +1,7 @@
 import responder
 
 import app.app as backapp
+from app.app import add_member2company
 import app.googleapi as googleapi
 
 api = responder.API(templates_dir='static')
@@ -55,6 +56,62 @@ async def validhashid(req, resp, *, hash_types):
         'type': t,
         'data': getattr(backapp, f'validID_{t}')(user_id)
     } for t in hash_types.split('-')]
+
+@api.route('/api/fetchaccessdata')
+async def fetchaccessdata(req, resp):
+    data = await req.media()
+    hashdata = backapp.decodeHashID(data['accesshash'])
+    if data['accesshash'] in getattr(backapp, f'validID_{hashdata["access_type"]}')(backapp.verify_user(data['token'])):
+        accessdata = getattr(backapp, f'get_{hashdata["access_type"]}')(hashdata['ids'], 0)
+        resp.media = {
+            'icon': accessdata['icon'],
+            'name': accessdata[f'{hashdata["access_type"]}_name'],
+        }
+        if hashdata["access_type"] == 'user':
+            resp.media['description'] = f'@{accessdata["user_name"]}'
+        elif hashdata["access_type"] == 'project':
+            company = backapp.decodeHashID(accessdata['company_id'])
+            if company['access_type'] == 'user':
+                resp.media['description'] = 'Private'
+            else:
+                resp.media['description'] = backapp.get_company(company['ids'], 100)['company_name']
+            resp.media['tree'] = accessdata['tree']
+
+@api.route('/api/createcompany')
+async def createcompany(req, resp):
+    data = await req.media()
+    data['admin'] = backapp.verify_user(data.pop('token'))
+    data['sub_admin'] = [backapp.decodeHashID(e)['ids'] for e in data['sub_admin']]
+    data['members'] = [backapp.decodeHashID(e)['ids'] for e in data['members']]
+    data.setdefault('icon', '/static/usericons/default.png')
+    resp.media = {
+        'isValid': True,
+        'accesshash': backapp.add_company(data)
+    }
+
+@api.route('/api/createproject')
+async def createproject(req, resp):
+    data = await req.media()
+    data['admin'] = backapp.verify_user(data.pop('token'))
+    data['sub_admin'] = []
+    data['members'] = [backapp.decodeHashID(e)['ids'] for e in data['members']]
+    data.setdefault('icon', '/static/usericons/default.png')
+    data['company_id'] = data['tree'].split('/')[0]
+    if data['company_id'] == 'private':
+        data['company_id'] = backapp.generateHashID(data['admin'], 'user')
+    resp.media = {
+        'isValid': True,
+        'accesshash': backapp.add_project(data)
+    }
+
+@api.route('/api/assign')
+async def assign(req, resp):
+    data = await req.media()
+    hashdata = backapp.decodeHashID(data['accesshash'])
+    getattr(backapp, f'add_member2{hashdata["access_type"]}')(hashdata['ids'], backapp.verify_user(data['token']))
+    resp.media = {
+        'isValid': True
+    }
 
 @api.route('/auth/hasgoogle')
 async def hasgoogle(req, resp):

@@ -8,9 +8,9 @@ from hashids import Hashids
 from app.db_connector import *
 
 accessType = [
-    'project',
     'company',
-    'user'
+    'project',
+    'user',
 ]
 accessHashid = Hashids(os.environ['HASHID_SALT'], 10)
 
@@ -46,20 +46,22 @@ def signup(data):
             'already_taken': True
         }
     else:
+        project_dict = json.dumps({'admin':[],'sub_admin':[],'members':[]})
         with SessionContext() as session:
             session.add(Users(
                 user_name=data['user_name'],
                 user_password=hashlib.sha256(data['user_password'].encode()).hexdigest(),
                 created_at=dt.datetime.now().isoformat(' ', 'seconds'),
-                email = data['email'],
-                phone_number = data['phone_number'],
-                nick_name = data['nick_name'],
-                real_name = data['real_name'],
-                zipcode = '-'.join(data['zipcode']),
-                address = '/'.join(data['address']),
-                ocupation = json.dumps(data['ocupation']),
-                companies = json.dumps(data['companies']),
-                projects = json.dumps(data['projects']),
+                icon='/static/usericons/default.png',
+                email=data['email'],
+                phone_number=data['phone_number'],
+                nick_name=data['nick_name'],
+                real_name=data['real_name'],
+                zipcode='-'.join(data['zipcode']),
+                address='/'.join(data['address']),
+                ocupation=json.dumps(data['ocupation']),
+                companies=project_dict,
+                projects=project_dict,
             ))
         with SessionContext() as session:
             return {
@@ -96,7 +98,7 @@ def username(user_id):
     with SessionContext() as session:
         return session.query(Users).get(user_id).user_name
 
-def generateHashID(access_type, ids):
+def generateHashID(ids, access_type):
     if not isinstance(access_type, int):
         access_type = accessType.index(access_type)
     return accessHashid.encode(ids, access_type)
@@ -108,24 +110,113 @@ def decodeHashID(hash):
         'access_type': accessType[data[1]]
     }
 
-def validID_project(user_id):
-    with SessionContext() as session:
-        return [accessHashid.encode(v, 0) for v in json.loads(session.query(Users).get(user_id).projects)]
-
 def validID_company(user_id):
     with SessionContext() as session:
-        return [accessHashid.encode(v, 1) for v in json.loads(session.query(Users).get(user_id).companies)]
+        return [generateHashID(v, 'company') for v in sum(json.loads(session.query(Users).get(user_id).companies).values(), [])]
+
+def validID_project(user_id):
+    with SessionContext() as session:
+        return [generateHashID(v, 'project') for v in sum(json.loads(session.query(Users).get(user_id).projects).values(), [])]
 
 def validID_user(user_id):
     friends = {user_id}
     with SessionContext() as session:
         user = session.query(Users).get(user_id)
-        for project in json.loads(user.projects):
-            friends |= {member for member in json.loads(session.query(Projects).get(project).members)}
-        for company in json.loads(user.companies):
-            friends |= {member for member in json.loads(session.query(Company).get(company).members)}
+        user_projects = json.loads(user.projects)
+        user_companies = json.loads(user.companies)
+        friends |= {session.query(Projects).get(i).admin for i in user_projects['admin']}
+        friends |= {session.query(Company).get(i).admin for i in user_companies['admin']}
+        auth_types = ['admin', 'sub_admin', 'members']
+        for i in range(1, len(auth_types)):
+            user_projects[auth_types[i]].extend(user_projects[auth_types[i - 1]])
+            user_companies[auth_types[i]].extend(user_companies[auth_types[i - 1]])
+            for project in user_projects[auth_types[i]]:
+                friends |= {member for member in json.loads(getattr(session.query(Projects).get(project), auth_types[i]))}
+            for company in user_companies[auth_types[i]]:
+                friends |= {member for member in json.loads(getattr(session.query(Company).get(company), auth_types[i]))}
     friends.remove(user_id)
-    return [accessHashid.encode(f, 2) for f in friends]
+    return [generateHashID(f, 'user') for f in friends]
+
+def get_company(data_id, privacy_level):
+    with SessionContext() as session:
+        data = DBtoDict(session.query(Company).get(data_id), ['id'])
+        return {k: v for k, v in data.items() if Company.privacy_settings[k] <= privacy_level}
+
+def get_project(data_id, privacy_level):
+    with SessionContext() as session:
+        data = DBtoDict(session.query(Projects).get(data_id), ['id'])
+        return {k: v for k, v in data.items() if Projects.privacy_settings[k] <= privacy_level}
+
+def get_user(data_id, privacy_level):
+    with SessionContext() as session:
+        data = DBtoDict(session.query(Users).get(data_id), ['id'])
+        return {k: v for k, v in data.items() if Users.privacy_settings[k] <= privacy_level}
+
+def add_company(data):
+    new = Company(
+        company_name=data['company_name'],
+        icon=data['icon'],
+        department=data['department'],
+        employee_number=int(data['employee_number']),
+        zipcode=data['zipcode'],
+        address=data['address'],
+        email=data['email'],
+        phone_number=data['phone_number'],
+        admin=int(data['admin']),
+        sub_admin=json.dumps(data['sub_admin']),
+        members=json.dumps(data['members']),
+    )
+    with SessionContext() as session:
+        session.add(new)
+        session.flush()
+        user = session.query(Users).get(data['admin'])
+        user.companies = add_admin(user.companies, 'admin', new.id)
+        return generateHashID(new.id, 'company')
+
+def add_project(data):
+    new = Projects(
+        project_name=data['project_name'],
+        icon=data['icon'],
+        company_id=data['company_id'],
+        admin=int(data['admin']),
+        sub_admin=json.dumps(data['sub_admin']),
+        members=json.dumps(data['members']),
+        schedule_privacy_level=data['schedule_privacy_level'],
+        chart_color=data['chart_color'],
+        status=0,
+        current_type=0,
+        tree=data['tree'],
+    )
+    with SessionContext() as session:
+        session.add(new)
+        session.flush()
+        user = session.query(Users).get(data['admin'])
+        user.projects = add_admin(user.projects, 'admin', new.id)
+        return generateHashID(new.id, 'project')
+
+def add_member2company(company_id, user_id):
+    with SessionContext() as session:
+        company = session.query(Company).get(company_id)
+        company.members = add_member2list(company.members, user_id)
+        user = session.query(Users).get(user_id)
+        user.companies = add_admin(user.companies, 'members', company_id)
+
+def add_member2project(project_id, user_id):
+    with SessionContext() as session:
+        project = session.query(Projects).get(project_id)
+        project.members = add_member2list(project.members, user_id)
+        user = session.query(Users).get(user_id)
+        user.projects = add_admin(user.projects, 'members', project_id)
+
+def add_admin(data, auth_type, ids):
+    tmp = json.loads(data)
+    tmp[auth_type].append(int(ids))
+    return json.dumps(tmp)
+
+def add_member2list(data, ids):
+    tmp = json.loads(data)
+    tmp.append(ids)
+    return json.dumps(tmp)
 
 def setfeedback(user_id, msg):
     if user_id is False:

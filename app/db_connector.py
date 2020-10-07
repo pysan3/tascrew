@@ -16,6 +16,7 @@ class Users(Base):
 	user_name = Column('user_name', String)
 	user_password = Column('user_password', String)
 	created_at = Column('created_at', String)
+	icon = Column('icon', String)
 	google_cred = Column('google_cred', String)
 	email = Column('email', String)
 	phone_number = Column('phone_number', String)
@@ -29,26 +30,63 @@ class Users(Base):
 	companies = Column('companies', String)
 	projects = Column('projects', String)
 
+	privacy_settings = {
+		'id': 0,
+		'user_name': 0,
+		'user_password': 0,
+		'created_at': 0,
+		'icon': 0,
+		'google_cred': 0,
+		'email': 0,
+		'phone_number': 0,
+		'nick_name': 0,
+		'real_name': 0,
+		'zipcode': 0,
+		'address': 0,
+		'ocupation': 0,
+		'off_days': 0,
+		'off_times': 0,
+		'companies': 0,
+		'projects': 0,
+	}
+
 	def __repr__(self):
-		return '<Users(id=%s, user_name=%s, user_password=%s, created_at=%s, google_cred=%s, email=%s, phone_number=%s, nick_name=%s, real_name=%s, zipcode=%s, address=%s, ocupation=%s, off_days=%s, off_times=%s, companies=%s, projects=%s, )>' \
-			% (self.id, self.user_name, self.user_password, self.created_at, self.google_cred, self.email, self.phone_number, self.nick_name, self.real_name, self.zipcode, self.address, self.ocupation, self.off_days, self.off_times, self.companies, self.projects, )
+		return '<Users(id=%s, user_name=%s, user_password=%s, created_at=%s, icon=%s, google_cred=%s, email=%s, phone_number=%s, nick_name=%s, real_name=%s, zipcode=%s, address=%s, ocupation=%s, off_days=%s, off_times=%s, companies=%s, projects=%s, )>' \
+			% (self.id, self.user_name, self.user_password, self.created_at, self.icon, self.google_cred, self.email, self.phone_number, self.nick_name, self.real_name, self.zipcode, self.address, self.ocupation, self.off_days, self.off_times, self.companies, self.projects, )
 
 class Company(Base):
 	__tablename__ = 'company'
 	id = Column('id', Integer, primary_key=True, autoincrement=True)
 	company_name = Column('company_name', String)
+	icon = Column('icon', String)
 	department = Column('department', String)
-	employee_number = Column('employee_number', String)
+	employee_number = Column('employee_number', Integer)
+	zipcode = Column('zipcode', String)
 	address = Column('address', String)
 	email = Column('email', String)
 	phone_number = Column('phone_number', String)
-	admin = Column('admin', String)
+	admin = Column('admin', Integer)
 	sub_admin = Column('sub_admin', String)
 	members = Column('members', String)
 
+	privacy_settings = {
+		'id': 0,
+		'company_name': 0,
+		'icon': 0,
+		'department': 0,
+		'employee_number': 0,
+		'zipcode': 0,
+		'address': 0,
+		'email': 0,
+		'phone_number': 0,
+		'admin': 0,
+		'sub_admin': 0,
+		'members': 0,
+	}
+
 	def __repr__(self) -> str:
-		return '<Company(id=%s, company_name=%s, department=%s, employee_number=%s, address=%s, email=%s, phone_number=%s, admin=%s, sub_admin=%s, members=%s, )>' \
-			% (self.id, self.company_name, self.department, self.employee_number, self.address, self.email, self.phone_number, self.admin, self.sub_admin, self.members)
+		return '<Company(id=%s, company_name=%s, icon=%s, department=%s, employee_number=%s, zipcode=%s, address=%s, email=%s, phone_number=%s, admin=%s, sub_admin=%s, members=%s, )>' \
+			% (self.id, self.company_name, self.icon, self.department, self.employee_number, self.zipcode, self.address, self.email, self.phone_number, self.admin, self.sub_admin, self.members, )
 
 class UsersSchedule(Base):
 	__tablename__ = 'usersschedule'
@@ -133,7 +171,10 @@ class Projects(Base):
 	__tablename__ = 'projects'
 	id = Column('id', Integer, primary_key=True, autoincrement=True)
 	project_name = Column('project_name', String)
+	icon = Column('icon', String)
 	company_id = Column('company_id', Integer)
+	admin = Column('admin', Integer)
+	sub_admin = Column('sub_admin', String)
 	members = Column('members', String)
 	schedule_privacy_level = Column('schedule_privacy_level', Integer)
 	chart_color = Column('chart_color', String)
@@ -141,9 +182,24 @@ class Projects(Base):
 	current_type = Column('current_type', Integer)
 	tree = Column('tree', String)
 
+	privacy_settings = {
+		'id': 0,
+		'project_name': 0,
+		'icon': 0,
+		'company_id': 0,
+		'admin': 0,
+		'sub_admin': 0,
+		'members': 0,
+		'schedule_privacy_level': 0,
+		'chart_color': 0,
+		'status': 0,
+		'current_type': 0,
+		'tree': 0,
+	}
+
 	def __repr__(self) -> str:
-		return '<Projects(id=%s, project_name=%s, company_id=%s, members=%s, schedule_privacy_level=%s, chart_color=%s, status=%s, current_type=%s, tree=%s, )>' \
-			% (self.id, self.project_name, self.company_id, self.members, self.schedule_privacy_level, self.chart_color, self.status, self.current_type, self.tree, )
+		return '<Projects(id=%s, project_name=%s, icon=%s, company_id=%s, admin=%s, sub_admin=%s, members=%s, schedule_privacy_level=%s, chart_color=%s, status=%s, current_type=%s, tree=%s, )>' \
+			% (self.id, self.project_name, self.icon, self.company_id, self.admin, self.sub_admin, self.members, self.schedule_privacy_level, self.chart_color, self.status, self.current_type, self.tree, )
 
 class TokenTable(Base):
 	__tablename__ = 'tokentable'
