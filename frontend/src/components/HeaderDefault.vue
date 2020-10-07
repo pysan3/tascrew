@@ -2,21 +2,28 @@
   <div id="headerDefault" class="header-default">
     <b-navbar toggleable="sm" type="dark" variant="dark" sticky>
       <b-navbar-brand to="/" class="mr-auto px-2">{{ $t('Message.title') }}</b-navbar-brand>
-      <b-navbar-nav v-show="is_loggedin">
-        <b-nav-item-dropdown>
-          <template slot="button-content">{{ project_name }}</template>
-        </b-nav-item-dropdown>
+      <b-navbar-nav v-show="is_loggedin" @click="chooseproject = !chooseproject">
+        <b-nav-item class="font-weight-bold">
+          {{ project_name }}
+          <!-- pull down icon -->
+          <!-- <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-down" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M3.204 5L8 10.481 12.796 5H3.204zm-.753.659l4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659z"/>
+          </svg> -->
+          <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-down-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+          </svg>
+        </b-nav-item>
       </b-navbar-nav>
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
       <b-collapse id="nav-collapse" is-nav>
         <b-navbar-nav>
-          <b-nav-item v-show="is_loggedin" to="/project">Home</b-nav-item>
-          <b-nav-item v-show="is_loggedin" to="/calendar">Calendar</b-nav-item>
-          <b-nav-item v-show="is_loggedin" to="/tasks">Tasks</b-nav-item>
-          <b-nav-item v-show="is_loggedin" to="/board">Board</b-nav-item>
-          <b-nav-item v-show="is_loggedin" to="/chart">Chart</b-nav-item>
-          <b-nav-item v-show="is_loggedin" to="/members">Members</b-nav-item>
-          <b-nav-item v-show="is_loggedin" to="/settings">Setting</b-nav-item>
+          <b-nav-item v-show="is_loggedin" :to="$_generateURL('', $route.params.id)">Home</b-nav-item>
+          <b-nav-item v-show="is_loggedin" :to="$_generateURL('calendar', $route.params.id)">Calendar</b-nav-item>
+          <b-nav-item v-show="is_loggedin" :to="$_generateURL('tasks', $route.params.id)">Tasks</b-nav-item>
+          <b-nav-item v-show="is_loggedin" :to="$_generateURL('board', $route.params.id)">Board</b-nav-item>
+          <b-nav-item v-show="is_loggedin" :to="$_generateURL('chart', $route.params.id)">Chart</b-nav-item>
+          <b-nav-item v-show="is_loggedin && !isFriendsPage()" :to="$_generateURL('members', $route.params.id)">Members</b-nav-item>
+          <b-nav-item v-show="is_loggedin && !isFriendsPage()" :to="$_generateURL('settings', $route.params.id)">Setting</b-nav-item>
           <b-nav-item v-show="!is_loggedin" to="/tryaccess/login">Login</b-nav-item>
           <b-nav-item v-show="!is_loggedin" to="/tryaccess/signup">Signup</b-nav-item>
         </b-navbar-nav>
@@ -26,7 +33,7 @@
         <b-navbar-nav>
           <b-nav-item-dropdown right id="user-dropdown">
             <template slot="button-content">{{ user_name }}</template>
-            <b-dropdown-item to="/">UserHome</b-dropdown-item>
+            <b-dropdown-item to="/user">UserHome</b-dropdown-item>
             <b-dropdown-item v-if="!is_loggedin" to="/tryaccess/login">login</b-dropdown-item>
             <b-dropdown-item v-if="!is_loggedin" to="/tryaccess/signup">signup</b-dropdown-item>
             <!-- <b-dropdown-item v-if="is_loggedin" to="/settings">MyProjects</b-dropdown-item> -->
@@ -39,19 +46,25 @@
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
+    <ChooseProject v-if="is_loggedin" v-show="chooseproject" @togglechoise="chooseproject = !chooseproject"/>
   </div>
 </template>
 
 <script>
+import ChooseProject from '@/components/ChooseProject'
 import Axios from 'axios'
 export default {
+  components: {
+    ChooseProject
+  },
   props: [
     'is_loggedin'
   ],
   data () {
     return {
       user_name: 'Anonymous',
-      project_name: 'tmp'
+      project_name: 'very_long_project_name',
+      chooseproject: false
     }
   },
   methods: {
@@ -61,6 +74,9 @@ export default {
       this.$store.commit('set_loggedin', false)
       this.user_name = 'Anonymous'
       this.$router.push('/').catch(err => {}) // eslint-disable-line
+    },
+    isFriendsPage () {
+      return (this.$route.params.id !== undefined) && (this.$_decodeHashID(this.$route.params.id).type === 'user')
     }
   },
   watch: {
@@ -70,10 +86,18 @@ export default {
           token: this.$store.getters.current_token
         }).then(response => {
           this.user_name = response.data.user_name
+        }).catch(error => {
+          if (process.env.NODE_ENV !== 'production') alert(error)
         })
+        this.$_refreshValidHashID('all')
       } else {
         this.user_name = 'Anonymous'
       }
+    },
+    '$route': async function () {
+      const info = await this.$_accessInformation(this.$route.params.id)
+      this.project_name = info !== undefined ? info.name : 'すべて(←いい名前を考えよう)'
+      this.$forceUpdate()
     }
   }
 }
