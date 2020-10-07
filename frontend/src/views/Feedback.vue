@@ -25,6 +25,8 @@ export default {
       }).then(() => {
         alert(this.$t('Message.fbthx'))
         this.$router.push('/')
+      }).catch(error => {
+        if (process.env.NODE_ENV !== 'production') alert(error)
       })
     }
   }
