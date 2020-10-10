@@ -29,6 +29,46 @@ def language_settings():
         f.write(json.dumps(dictionary))
         pprint(dictionary)
 
+default_infos = {
+    'user': [{
+        'user_name': 'master',
+        'user_password': '000',
+        'email': 'hogehoge@test.com',
+        'phone_number': '000-0000-0000',
+        'nick_name': 'admin',
+        'real_name': 'admin',
+        'zipcode': ['171', '0033'],
+        'address': ['東京都豊島区高田', '2-5-19'],
+        'ocupation': [],
+        'companies': [],
+        'projects': []
+    }, {
+        'user_name': 'pysan3',
+        'user_password': '000',
+        'email': 'hogehoge@test.com',
+        'phone_number': '000-0000-0000',
+        'nick_name': 'takuto',
+        'real_name': 'takuto',
+        'zipcode': ['171', '0033'],
+        'address': ['東京都豊島区高田', '2-5-19'],
+        'ocupation': [],
+        'companies': [],
+        'projects': []
+    }, {
+        'user_name': 'teppei',
+        'user_password': '000',
+        'email': 'hogehoge@test.com',
+        'phone_number': '000-0000-0000',
+        'nick_name': 'teppei',
+        'real_name': 'teppei',
+        'zipcode': ['000', '0000'],
+        'address': ['hoge', 'fuga'],
+        'ocupation': [],
+        'companies': [],
+        'projects': []
+    }]
+}
+
 def db_init(auto_yes=False):
     if auto_yes or input('Going to delete all data in DB. Are you sure what you are doing? [y/N] ') == 'y':
         print('initializing DB')
@@ -36,19 +76,8 @@ def db_init(auto_yes=False):
         from app.db_connector import Base, engine
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
-        backapp.signup({
-            'user_name': 'pysan3',
-            'user_password': '000',
-            'email': 'hogehoge@test.com',
-            'phone_number': '000-0000-0000',
-            'nick_name': 'pysan3',
-            'real_name': 'pysan3',
-            'zipcode': ['000', '0000'],
-            'address': ['hoge', 'fuga'],
-            'ocupation': [],
-            'companies': [],
-            'projects': []
-        })
+        for user in default_infos['user']:
+            backapp.signup(user)
     else:
         print('Not initializing the DB.')
 
