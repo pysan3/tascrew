@@ -5,7 +5,7 @@
       {{ k }} : {{ v }}
     </div>
     <h2>invite</h2>
-    <a href="#">{{ inviteURL() }}</a>
+    <a :href="inviteURL()">{{ inviteURL() }}</a>
   </div>
 </template>
 

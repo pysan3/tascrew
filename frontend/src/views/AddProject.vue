@@ -70,16 +70,20 @@ export default {
     const tmpList = [...this.master_list]
     await Promise.all(this.$store.getters.getValidAccess.company.map(async e => {
       const data = await this.$_accessInformation(e)
-      tmpList.push({
-        value: e,
-        html: data.name
-      })
+      if (data !== undefined) {
+        tmpList.push({
+          value: e,
+          html: data.name
+        })
+      }
     }).concat(this.$store.getters.getValidAccess.project.map(async e => {
       const data = await this.$_accessInformation(e)
-      tmpList.push({
-        value: `${data.tree}/${e}`,
-        html: '&nbsp;&nbsp;&nbsp;&nbsp;'.repeat((data.tree.match(/\//g) || []).length + 1) + data.name
-      })
+      if (data !== undefined) {
+        tmpList.push({
+          value: `${data.tree}/${e}`,
+          html: '&nbsp;&nbsp;&nbsp;&nbsp;'.repeat((data.tree.match(/\//g) || []).length + 1) + data.name
+        })
+      }
     }))).then(() => {
       const dig = (node, s, value) => {
         if (node[s[0]] === undefined) {

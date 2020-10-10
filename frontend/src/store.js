@@ -17,7 +17,8 @@ const state = {
     'user'
   ],
   validAccess: {},
-  accessDict: {}
+  accessInfo: {},
+  accessData: {}
 }
 
 const getters = {
@@ -32,6 +33,12 @@ const getters = {
   },
   getValidAccess (state) {
     return Object.fromEntries(state.accessType.map(e => [e, state.validAccess[e] || []]))
+  },
+  getAccessInfo (state) {
+    return state.accessInfo
+  },
+  getAccessData (state) {
+    return state.accessData
   }
 }
 
@@ -48,8 +55,11 @@ const mutations = {
   setValidAccess (state, { type, value }) {
     Vue.set(state.validAccess, type, value)
   },
-  setAccessDict (state, { type, value }) {
-    Vue.set(state.accessDict, type, value)
+  setAccessInfo (state, { hash, value }) {
+    Vue.set(state.accessInfo, hash, value)
+  },
+  setAccessData (state, { hash, value }) {
+    Vue.set(state.accessData, hash, value)
   }
 }
 

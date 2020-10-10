@@ -32,6 +32,7 @@ export default {
       return `/${pagetype}` + (accesshash === undefined ? '' : `/${accesshash}`)
     },
     $_checkValidHashID (hash) {
+      if (hash === undefined) return false
       return store.getters.getValidAccess[this.$_decodeHashID(hash).type].includes(hash)
     },
     $_refreshValidHashID (types) {
@@ -71,17 +72,24 @@ export default {
     },
     $_accessInformation (hash) {
       if (hash === undefined) return undefined
-      else if (store.state.accessDict[hash] !== undefined) return store.state.accessDict[hash]
-      return Axios.post(process.env.VUE_APP_BASE_URL + '/api/fetchaccessdata', {
-        token: store.getters.current_token,
-        accesshash: hash
-      }).then(response => {
-        store.commit('setAccessDict', {
-          type: hash,
-          value: response.data
-        })
-        return response.data
-      }).catch(() => undefined)
+      const info = store.getters.getAccessInfo[hash]
+      if (info !== undefined) return info
+      else {
+        return Axios.post(process.env.VUE_APP_BASE_URL + '/api/fetchaccessinfo', {
+          token: store.getters.current_token,
+          accesshash: hash
+        }).then(response => {
+          if (response.data) {
+            store.commit('setAccessInfo', {
+              hash: hash,
+              value: response.data
+            })
+            return response.data
+          } else {
+            return undefined
+          }
+        }).catch(() => undefined)
+      }
     }
   }
 }
