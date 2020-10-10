@@ -8,6 +8,14 @@
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:300,700" rel="stylesheet">
     <link rel="icon" href="/static/favicon.ico">
+    <script> // js library that makes "mailto:" links work in Chrome browsers
+      window.onload = () => {
+        const mailtoui = document.createElement('script')
+        mailtoui.type = 'text/javascript'
+        mailtoui.src = 'https://cdn.jsdelivr.net/npm/mailtoui@1.0.3/dist/mailtoui-min.js'
+        document.body.appendChild(mailtoui)
+      }
+    </script>
     <title>tascrew</title>
   </head>
   <body>
