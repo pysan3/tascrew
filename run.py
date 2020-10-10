@@ -1,7 +1,6 @@
 import responder
 
 import app.app as backapp
-from app.app import add_member2company
 import app.googleapi as googleapi
 
 api = responder.API(templates_dir='static')
@@ -57,25 +56,28 @@ async def validhashid(req, resp, *, hash_types):
         'data': getattr(backapp, f'validID_{t}')(user_id)
     } for t in hash_types.split('-')]
 
-@api.route('/api/fetchaccessdata')
-async def fetchaccessdata(req, resp):
+@api.route('/api/fetchaccessinfo')
+async def fetchaccessinfo(req, resp):
     data = await req.media()
     hashdata = backapp.decodeHashID(data['accesshash'])
     if data['accesshash'] in getattr(backapp, f'validID_{hashdata["access_type"]}')(backapp.verify_user(data['token'])):
-        accessdata = getattr(backapp, f'get_{hashdata["access_type"]}')(hashdata['ids'], 0)
+        accessinfo = getattr(backapp, f'get_{hashdata["access_type"]}')(hashdata['ids'], 0)
         resp.media = {
-            'icon': accessdata['icon'],
-            'name': accessdata[f'{hashdata["access_type"]}_name'],
+            'icon': accessinfo['icon'],
+            'name': accessinfo[f'{hashdata["access_type"]}_name'],
         }
         if hashdata["access_type"] == 'user':
-            resp.media['description'] = f'@{accessdata["user_name"]}'
+            resp.media['name'] = accessinfo['nick_name']
+            resp.media['description'] = f'@{accessinfo["user_name"]}'
+            for k in ['user_name', 'real_name', 'email', 'phone_number', 'zipcode', 'address']:
+                resp.media[k] = accessinfo[k]
         elif hashdata["access_type"] == 'project':
-            company = backapp.decodeHashID(accessdata['company_id'])
+            company = backapp.decodeHashID(accessinfo['company_id'])
             if company['access_type'] == 'user':
                 resp.media['description'] = 'Private'
             else:
                 resp.media['description'] = backapp.get_company(company['ids'], 100)['company_name']
-            resp.media['tree'] = accessdata['tree']
+            resp.media['tree'] = accessinfo['tree']
 
 @api.route('/api/createcompany')
 async def createcompany(req, resp):
@@ -108,9 +110,8 @@ async def createproject(req, resp):
 async def assign(req, resp):
     data = await req.media()
     hashdata = backapp.decodeHashID(data['accesshash'])
-    getattr(backapp, f'add_member2{hashdata["access_type"]}')(hashdata['ids'], backapp.verify_user(data['token']))
     resp.media = {
-        'isValid': True
+        'isValid': getattr(backapp, f'add_member2{hashdata["access_type"]}')(hashdata['ids'], backapp.verify_user(data['token']))
     }
 
 @api.route('/auth/hasgoogle')

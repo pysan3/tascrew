@@ -122,6 +122,25 @@ def validID_user(user_id):
     friends = {user_id}
     with SessionContext() as session:
         user = session.query(Users).get(user_id)
+        user_companies = sum(json.loads(user.companies).values(), [])
+        for company_id in user_companies:
+            company = session.query(Company).get(company_id)
+            friends.add(company.admin)
+            friends |= set(json.loads(company.sub_admin))
+            friends |= set(json.loads(company.members))
+        user_projects = sum(json.loads(user.projects).values(), [])
+        for project_id in user_projects:
+            project = session.query(Projects).get(project_id)
+            friends.add(project.admin)
+            friends |= set(json.loads(project.sub_admin))
+            friends |= set(json.loads(project.members))
+    friends.remove(user_id)
+    return [generateHashID(f, 'user') for f in friends]
+
+def enableAccess_user(user_id):
+    friends = {user_id}
+    with SessionContext() as session:
+        user = session.query(Users).get(user_id)
         user_projects = json.loads(user.projects)
         user_companies = json.loads(user.companies)
         friends |= {session.query(Projects).get(i).admin for i in user_projects['admin']}
@@ -140,17 +159,17 @@ def validID_user(user_id):
 def get_company(data_id, privacy_level):
     with SessionContext() as session:
         data = DBtoDict(session.query(Company).get(data_id), ['id'])
-        return {k: v for k, v in data.items() if Company.privacy_settings[k] <= privacy_level}
+        return {k: v if Company.privacy_settings[k] <= privacy_level else '' for k, v in data.items()}
 
 def get_project(data_id, privacy_level):
     with SessionContext() as session:
         data = DBtoDict(session.query(Projects).get(data_id), ['id'])
-        return {k: v for k, v in data.items() if Projects.privacy_settings[k] <= privacy_level}
+        return {k: v if Projects.privacy_settings[k] <= privacy_level else '' for k, v in data.items()}
 
 def get_user(data_id, privacy_level):
     with SessionContext() as session:
-        data = DBtoDict(session.query(Users).get(data_id), ['id'])
-        return {k: v for k, v in data.items() if Users.privacy_settings[k] <= privacy_level}
+        data = DBtoDict(session.query(Users).get(data_id), ['id', 'user_password', 'google_cred'])
+        return {k: v if Users.privacy_settings[k] <= privacy_level else '' for k, v in data.items()}
 
 def add_company(data):
     new = Company(
@@ -197,6 +216,8 @@ def add_project(data):
 def add_member2company(company_id, user_id):
     with SessionContext() as session:
         company = session.query(Company).get(company_id)
+        if company is None:
+            return False
         company.members = add_member2list(company.members, user_id)
         user = session.query(Users).get(user_id)
         user.companies = add_admin(user.companies, 'members', company_id)
@@ -204,6 +225,8 @@ def add_member2company(company_id, user_id):
 def add_member2project(project_id, user_id):
     with SessionContext() as session:
         project = session.query(Projects).get(project_id)
+        if project is None:
+            return False
         project.members = add_member2list(project.members, user_id)
         user = session.query(Users).get(user_id)
         user.projects = add_admin(user.projects, 'members', project_id)

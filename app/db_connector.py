@@ -31,12 +31,12 @@ class Users(Base):
 	projects = Column('projects', String)
 
 	privacy_settings = {
-		'id': 0,
+		'id': -1,
 		'user_name': 0,
-		'user_password': 0,
-		'created_at': 0,
+		'user_password': -1,
+		'created_at': -1,
 		'icon': 0,
-		'google_cred': 0,
+		'google_cred': -1,
 		'email': 0,
 		'phone_number': 0,
 		'nick_name': 0,
@@ -70,7 +70,7 @@ class Company(Base):
 	members = Column('members', String)
 
 	privacy_settings = {
-		'id': 0,
+		'id': -1,
 		'company_name': 0,
 		'icon': 0,
 		'department': 0,
@@ -183,7 +183,7 @@ class Projects(Base):
 	tree = Column('tree', String)
 
 	privacy_settings = {
-		'id': 0,
+		'id': -1,
 		'project_name': 0,
 		'icon': 0,
 		'company_id': 0,
