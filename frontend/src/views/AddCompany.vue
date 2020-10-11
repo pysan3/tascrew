@@ -1,17 +1,17 @@
 <template>
   <div id="addcompany">
-    <h1>会社登録</h1>
+    <h1>{{ $t('Head.addcompany') }}</h1>
     <div v-for="key of Object.keys(company_data)" :key="key">
       <input type="text" v-model="company_data[key]">
     </div>
     <div>
-      <h3>他の管理者</h3>
+      <h3>{{ $t('Head.subadmin') }}</h3>
       <textarea v-model="hidden_status.sub_admin" cols="30" rows="3"></textarea>
-      <h3>社員</h3>
+      <h3>{{ $t('Head.empoloyee') }}</h3>
       <textarea v-model="hidden_status.members" cols="30" rows="3"></textarea>
     </div>
     <div>
-      <button class="btn btn-primary" @click="submitData()">Create</button>
+      <button class="btn btn-primary" @click="submitData()">{{ $t('Message.assign') }}</button>
     </div>
   </div>
 </template>

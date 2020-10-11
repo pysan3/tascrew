@@ -1,21 +1,21 @@
 <template>
   <div id="addproject">
-    <h1>プロジェクト作成</h1>
+    <h1>{{ $t('Head.addproject') }}</h1>
     <div v-for="key of Object.keys(project_data)" :key="key">
       <input type="text" v-model="project_data[key]">
     </div>
     <div>
-      <h3>紐付けるプロジェクト</h3>
+      <h3>{{ $t('Head.masterproject') }}</h3>
       <b-form-select v-model="hidden_status.tree" :options="master_list">
     </div>
     <div>
-      <h3>他の管理者</h3>
+      <h3>{{ $t('Head.subadmin') }}</h3>
       <textarea v-model="hidden_status.sub_admin" cols="30" rows="3"></textarea>
-      <h3>社員</h3>
+      <h3>{{ $t('Head.members') }}</h3>
       <textarea v-model="hidden_status.members" cols="30" rows="3"></textarea>
     </div>
     <div>
-      <button class="btn btn-primary" @click="submitData()">Create</button>
+      <button class="btn btn-primary" @click="submitData()">{{ $t('Message.assign') }}</button>
     </div>
   </div>
 </template>
@@ -27,8 +27,8 @@ export default {
     return {
       project_data: {
         project_name: 'tascrew実装',
-        schedule_privacy_level: 'TODO',
-        chart_color: 'TODO'
+        schedule_privacy_level: 'プライバシーレベル',
+        chart_color: 'チャートカラー'
       },
       hidden_status: {
         tree: this.$route.query.parent || 'private',
@@ -36,7 +36,7 @@ export default {
         members: ''
       },
       master_list: [
-        { value: 'private', text: 'my own project' }
+        { value: 'private', text: this.$t('Message.ownproject') }
       ]
     }
   },

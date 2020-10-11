@@ -2,7 +2,7 @@
   <div class="wrapper fadeInDown">
     <div id="formContent">
       <!-- Tabs Titles -->
-      <h2>{{ pagename[islogin] }}</h2>
+      <h2>{{ $t(`Pagename.${pagename[islogin]}`) }}</h2>
 
       <div id="fadeInClass">
         <!-- Icon -->
@@ -26,14 +26,13 @@
 
         <textarea v-show="!islogin" name="ocupation" class="fadeIn" cols="30" rows="4" v-model="user_info.ocupation" placeholder="後で綺麗に実装(キーワードから選択式にしたほうがいい気がする)"></textarea>
 
-        <input type="submit" class="fadeIn" :value="`${pagename[islogin]}`" @click="tryAccess()">
+        <input type="submit" class="fadeIn" :value="$t(`Pagename.${pagename[islogin]}`)" @click="tryAccess()">
 
       </div>
       <!-- Remind Passowrd -->
       <div id="formFooter">
-        <a class="underlineHover" @click="$router.push({ name: 'tryaccess', params: { page: pagename[islogin ^ 1] }, query: $route.query })">{{ msg[islogin ^ 1] }}?</a>
+        <a class="underlineHover" @click="$router.push({ name: 'tryaccess', params: { page: pagename[islogin ^ 1] }, query: $route.query })">{{ $t(`Head.goto${pagename[islogin ^ 1]}`) }}</a>
       </div>
-
     </div>
   </div>
 </template>
@@ -51,7 +50,6 @@ export default {
       islogin: 1,
       loadAddress: false,
       pagename: ['signup', 'login'],
-      msg: ['make a new account', 'already have an account'],
       user_info: {
         zipcode: ['', ''],
         address: ['', ''],
@@ -63,20 +61,22 @@ export default {
           type: 'email',
           placeholder: 'username',
           required: true,
-          showOnLogin: true
+          showOnLogin: true,
+          error_msg: this.$t('Error.noletter')
         }],
         ['user_password', {
           type: 'password',
           placeholder: 'user password',
           required: true,
-          showOnLogin: true
+          showOnLogin: true,
+          error_msg: this.$t('Error.noletter')
         }],
         ['re_password', {
           type: 'password',
           placeholder: 'retype password',
           required: true,
           checkFunc: e => e === this.user_info.user_password,
-          error_msg: 'not matching user_password'
+          error_msg: this.$t('Error.nomatchpassword')
         }],
         ['real_name', {
           type: 'text',
@@ -90,25 +90,29 @@ export default {
           type: 'email',
           placeholder: 'e-mail',
           required: true,
-          checkFunc: e => e.match(/^[A-Za-z0-9]{1}[A-Za-z0-9_.-]*@{1}[A-Za-z0-9_.-]{1,}\.[A-Za-z0-9]{1,}$/)
+          checkFunc: e => e.match(/^[A-Za-z0-9]{1}[A-Za-z0-9_.-]*@{1}[A-Za-z0-9_.-]{1,}\.[A-Za-z0-9]{1,}$/),
+          error_msg: this.$t('Error.nomatchformat')
         }],
         ['phone_number', {
           type: 'tel',
           placeholder: 'phone number',
           required: true,
-          checkFunc: e => e.replace(/[━.*‐.*―.*－.*\-.*ー.*-]/gi, '').match(/^(0[5-9]0[0-9]{8}|0[1-9][1-9][0-9]{7})$/)
+          checkFunc: e => e.replace(/[━.*‐.*―.*－.*\-.*ー.*-]/gi, '').match(/^(0[5-9]0[0-9]{8}|0[1-9][1-9][0-9]{7})$/),
+          error_msg: this.$t('Error.nomatchformat')
         }],
         ['zipcode', {
           required: true,
           hidden: true,
           id_name: 'zipcode_input',
-          checkFunc: e => e[0].length === 3 && e[1].length === 4
+          checkFunc: e => e[0].length === 3 && e[1].length === 4,
+          error_msg: this.$t('Error.nomatchformat')
         }],
         ['address', {
           required: true,
           hidden: true,
           id_name: 'address_main',
-          checkFunc: e => e[0].length > 0
+          checkFunc: e => e[0].length > 0,
+          error_msg: this.$t('Error.noletter')
         }],
         ['ocupation', {
           hidden: true
@@ -142,7 +146,7 @@ export default {
       error.className += 'error_msg'
       element.parentNode.insertBefore(error, element.nextSibling)
     },
-    requiredError () {
+    matchFormat () {
       // すでに表示中のエラーメッセージを一旦消去する
       Array.from(document.getElementsByClassName('error_msg')).forEach(e => {
         if (e.previousSibling.tagName.toLowerCase() === 'input') {
@@ -150,7 +154,7 @@ export default {
         }
         e.remove()
       })
-      let hasError = false
+      let noError = true
       for (const [key, value] of this.input_info) {
         if (value.required === true) {
           if (value.checkFunc === undefined) {
@@ -159,16 +163,16 @@ export default {
           if (this.user_info[key] === undefined || !value.checkFunc(this.user_info[key])) {
             const place = document.getElementById(value.id_name || key)
             place.style.borderColor = 'red'
-            this.insertErrorMsg(place, value.error_msg || 'more than 1 letter is required')
-            hasError = true
+            this.insertErrorMsg(place, value.error_msg || this.$t('Error.noletter'))
+            noError = false
           }
         }
       }
-      return hasError
+      return noError
     },
     tryAccess () {
-      if (!this.islogin && this.requiredError()) {
-        alert('やり直してください')
+      if (!this.islogin && !this.matchFormat()) {
+        alert(this.$t('Error.error') + this.$t('Error.plzredo'))
         return
       }
       // 本名やニックネームが未定の場合はユーザ名を適用
@@ -198,13 +202,13 @@ export default {
           }
         } else {
           if (response.data.already_taken === true) {
-            this.insertErrorMsg(document.getElementById('user_name'), 'this username is already taken.')
+            this.insertErrorMsg(document.getElementById('user_name'), this.$t('Head.user_name') + this.$t('Error.already_taken'))
           }
           alert(response.data.msg)
         }
       }).catch(error => {
         if (process.env.NODE_ENV !== 'production') alert(error)
-        alert('通信エラーが発生しました。\nやり直してください')
+        alert(this.$t('Error.connection') + this.$t('Error.error') + this.$t('Error.plzredo'))
       })
     },
     page_type () {
@@ -212,7 +216,7 @@ export default {
       if (nextpage === 'login') this.islogin = 1
       else if (nextpage === 'signup') this.islogin = 0
       else {
-        alert('目的地URLが存在しません。')
+        alert(this.$t('Error.pagenotfound'))
         this.$router.push('/')
       }
     }

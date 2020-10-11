@@ -1,12 +1,12 @@
 <template>
   <div id="calendarapi">
-    <h3 class="text-center py-3 px-4 border-bottom">Calendar API settings</h3>
+    <h3 class="text-center py-3 px-4 border-bottom">{{ $t('Settings.calendarapi') }}</h3>
     <div class="text-center" v-if="!has_google">
-      <h4>Get Authenticated</h4>
-      <button class="btn btn-info btn-lg" @click="getAuthCode">get authCode</button>
+      <h4>{{ $t('Settings.getauth') }}</h4>
+      <button class="btn btn-info btn-lg" @click="getAuthCode">{{ $t('Settings.getauthbtn') }}</button>
     </div>
     <div v-if="has_google">
-      <h4 class="my-3">Set Privacy</h4>
+      <h4 class="my-3">{{ $t('Settings.setprivacy') }}</h4>
       <div v-for="c in calendar_list" :key="c" class="d-flex border-top py-2">
         <div class="d-block text-truncate align-self-center"><b>{{ c.summary }}</b></div>
         <div class="d-block text-truncate align-self-center flex-grow-1">{{ c.description }}</div>
@@ -33,8 +33,8 @@ export default {
       has_google: false,
       calendar_list: [],
       privacy_msg: [
-        'public',
-        'private'
+        this.$t('Settings.privacy_level_public'),
+        this.$t('Settings.privacy_level_private')
       ]
     }
   },
@@ -73,9 +73,9 @@ export default {
         c_id: calendar.id,
         new_level: level
       }).then(response => {
-        if (!response.data.isValid) alert('Something went wrong. Please reload this page and try again.')
+        if (!response.data.isValid) alert(this.$t('Error.plzreload'))
       }).catch(error => {
-        alert(`ERROR: ${error}. Please reload this page and try again.`)
+        alert(this.$t('Error.error') + error + this.$t('Error.plzreload'))
       })
       calendar.privacy_level = level
       this.$forceUpdate()

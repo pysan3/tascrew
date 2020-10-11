@@ -1,7 +1,10 @@
 ,en,ja,
-title,tascrew,tascrew
-notification,Notifications,お知らせ
-notfoundTitle,Oops! Page Not Be Found,ページが見つかりませんでした
 notfoundMsg,Sorry but the page you are looking for does not exist~ have been removed~ name changed or is temporarily unavailable,このページは存在しない、または名前が変更されました。詳細に関しては遠慮なくお問い合わせください。
 notfoundReturn,Send a Feedback,フィードバックを送る
 fbthx,Thanks for your feedback! We will reply soon.,フィードバックありがとうございます。早急に対処いたします。
+openGmap,Open with Google Map,Googleマップで開く
+anonymoususername,Anonymous,未登録
+all,All,すべて
+assign,Assign,登録
+ownproject,My Own Project,個人プロジェクト
+send,Send,送信

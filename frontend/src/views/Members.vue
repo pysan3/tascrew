@@ -4,15 +4,15 @@
 
     </div>
     <div v-else id="friends">
-      <h1>友達</h1>
+      <h1>{{ $t('Head.friend') }}</h1>
       <table class="table">
         <thead class="thead-light"><tr>
-          <th>友達</th>
-          <th>user_name</th>
-          <th>real_name</th>
-          <th>email</th>
-          <th>phone_number</th>
-          <th>address</th>
+          <th>{{ $t('Head.friend') }}</th>
+          <th>{{ $t('Head.user_name') }}</th>
+          <th>{{ $t('Head.real_name') }}</th>
+          <th>{{ $t('Head.email') }}</th>
+          <th>{{ $t('Head.phone_number') }}</th>
+          <th>{{ $t('Head.address') }}</th>
         </tr></thead>
         <tr v-for="(data, hash) in friendsdata" :key="hash" class="border-bottom">
           <td><router-link :to="`/user/${hash}`">{{ data.name }}</router-link></td>
@@ -20,7 +20,7 @@
           <td>{{ data.real_name }}</td>
           <td><a :href="`mailto:${data.email}`" class="mailtoui">{{ data.email }}</a></td>
           <td><a :href="`tel:${data.phone_number}`">{{ data.phone_number }}</a></td>
-          <td><a :href="`http://maps.google.co.jp/maps?q=${encodeURI(data.address.replace(/\//g, ' '))}`" target="_blank">Googleマップを開く</a></td>
+          <td><a :href="`http://maps.google.co.jp/maps?q=${encodeURI(data.address.replace(/\//g, ' '))}`" target="_blank">{{ $t('Message.openGmap') }}</a></td>
         </tr>
       </table>
     </div>

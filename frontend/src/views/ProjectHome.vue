@@ -1,6 +1,6 @@
 <template>
   <div id="projecthome">
-    <h1>プロジェクトホーム</h1>
+    <h1>{{ $t('Store.accessType_project') + $t('Pagename.home') }}</h1>
     <div v-for="(v, k) in elementdata" :key="k">
       {{ k }} : {{ v }}
     </div>

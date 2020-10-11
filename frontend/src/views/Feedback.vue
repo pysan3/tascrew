@@ -1,7 +1,8 @@
 <template>
   <div id="feedback">
+    <h1>{{ $t('Pagename.feedback') }}</h1>
     <textarea id="feedback" cols="30" rows="10" v-model="feedback"></textarea>
-    <button class="btn btn-dark" @click="send_feedback()">Send</button>
+    <button class="btn btn-dark" @click="send_feedback()">{{ $t('Message.send') }}</button>
   </div>
 </template>
 
@@ -16,7 +17,7 @@ export default {
   methods: {
     send_feedback () {
       if (this.feedback.length === 0) {
-        alert('文字を入力してください')
+        alert(this.$t('Error.noletter'))
         return
       }
       Axios.post(process.env.VUE_APP_BASE_URL + '/api/feedback', {

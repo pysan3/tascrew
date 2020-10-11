@@ -4,9 +4,9 @@
       <div v-for="type of $store.state.accessType" :key="type" class="col-12 col-md-6 col-lg-4">
         <div class="border rounded px-3 py-2">
           <div class="d-flex bg-light border-top border-bottom py-2 px-1">
-            <div class="flex-grow-1 text-left"><h5 class="m-0">{{ type }}</h5></div>
-            <div v-if="type !== 'user'" @click="addNew(type)" class="px-1"><a>ADD</a></div>
-            <div @click="reload(type)" class="px-1"><a>RELOAD</a></div>
+            <div class="flex-grow-1 text-left"><h5 class="m-0">{{ $t(`Store.accessType_${type}`) }}</h5></div>
+            <div v-if="type !== 'user'" @click="addNew(type)" class="px-1"><a>(ADD)</a></div>
+            <div @click="reload(type)" class="px-1"><a>(RELOAD)</a></div>
           </div>
           <div v-for="e in $store.getters.getValidAccess[type].filter(e => elementdata[e])" :key="e" @click="push2ID(e)" class="d-flex border-bottom py-2 px-1 align-items-center">
             <div class="flex-shrink-1">

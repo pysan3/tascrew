@@ -1,13 +1,13 @@
 <template>
   <div id="settings" class="row no-gutters">
     <nav id="sidebar" class="col-3 col-lg-2 d-none d-md-block text-left border-right">
-      <h3 class="border-bottom py-3 px-4 m-0">Settings</h3>
+      <h3 class="border-bottom py-3 px-4 m-0">{{ $t('Store.accessType_user') + $t('Pagename.settings') }}</h3>
       <Searchbar :setting_list="setting_list" />
     </nav>
     <div id="content" class="col-12 col-md-9 col-lg-10">
       <div class="border rounded text-left mb-3 d-md-none">
         <button class="btn btn-dark mx-3 my-1" data-toggle="collapse" data-target="#searchbar-holder" aria-expand="false" aria-controls="searchbar-holder">
-          Settings
+          {{ $t('Store.accessType_user') + $t('Pagename.settings') }}
         </button>
         <div class="collapse" id="searchbar-holder">
           <div class="card card-body border-0 p-0">

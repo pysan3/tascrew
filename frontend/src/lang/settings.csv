@@ -1,3 +1,8 @@
 ,en,ja
 calendarapi,Calendar API Settings,GoogleカレンダーAPI
+getauth,Get Authenticated,カレンダーへのアクセス
+getauthbtn,Click here to allow Authenticated,アクセスを承認する
+setprivacy,Set Privacy,プライバシー設定
+privacy_level_public,Public,公開
+privacy_level_private,Private,非公開
 notfound,NOT FOUND(for tests),テスト

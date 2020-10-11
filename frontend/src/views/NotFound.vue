@@ -4,7 +4,7 @@
       <div class="notfound-404">
         <h1>4<span><img src="@/assets/emoji.png" alt="0"></span>4</h1>
       </div>
-      <h2>{{ $t('Message.notfoundTitle') }}</h2>
+      <h2>{{ $t('Error.pagenotfound') }}</h2>
       <p>{{ $t('Message.notfoundMsg') }}</p>
       <router-link to="/feedback">{{ $t('Message.notfoundReturn') }}</router-link>
     </div>
